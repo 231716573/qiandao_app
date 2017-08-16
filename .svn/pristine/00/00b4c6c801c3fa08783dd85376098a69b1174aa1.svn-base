@@ -1,0 +1,149 @@
+
+
+	//签到
+	function senduser(acturl){
+		var oDate = new Date();
+		var timestamp = parseInt(oDate.getTime()/1000);
+		var key = 'l5pqXUqV5VpuEpx7';
+		var sign = hex_md5(key+timestamp);
+	
+		var data =  {
+					"code":_code,
+					"shopId":shop_Id,
+					"adminId":admin_Id ,
+					"adminName":admin_Name,
+					"timestamp":timestamp,
+					"sign":sign
+				};
+	
+		api.ajax({
+	        url:"http://test.7wanl.com/dataapi.php?mod=activity&action=verify",
+	        method:'post',
+	        data: {
+		        values:data
+		    },
+		    cache: false,
+		    timeout: 30,
+		    dataType: 'json'
+	    },function(ret,err){
+	//      	alert(JSON.stringify(ret))
+	    	if(ret){
+	    		
+	    		if(ret.code == 0){
+	
+					$api.remove($api.dom(".qd_delete"));
+					var qdYes = '<dd class="qd_yes qd_delete" style="color:green;">已签到</dd>';
+					
+					alert("签到成功，正在跳转...")
+	
+					$api.append($api.dom(".qd"), qdYes);
+	
+					setTimeout(function (){
+						
+			            api.closeFrame({
+			                name: acturl
+			            });
+			            api.openFrame({
+			                name: acturl,
+			                url: acturl+".html?uid="+window.localStorage["uid"]+"&activityId="+GetString("activityId")+"&accessToken="+GetString("accessToken"),
+			                rect: {
+						        x:0,
+						        y:20,
+						        w:api.winWidth,
+						        h:api.winHeight-20
+					        },
+					        bounces: false,
+						    bgColor: 'rgba(0,0,0,0)',
+						    vScrollBarEnabled: false,
+						    hScrollBarEnabled: false
+			            });
+			            api.closeFrame({
+			                name: acturl+'_msg'
+			            });
+					},1000)
+	
+				}else if(ret.code == -1){
+					alert(ret.msg)
+				}
+	    	}
+	    	if(err){
+	    		alert('发生未知错误，请重新加载页面');  
+	    	}
+	    	
+	    });
+		
+	}
+
+    function inputLength(){
+
+		// 删掉input内容
+		$api.addEvt($api.dom(".codeClose"), "click", function (){
+			document.getElementById("mobile").value = " ";
+			document.getElementById("mobile").focus();
+			$api.css($api.dom(".codeClose"),"display:none");
+			
+			//删除手机列表
+			var section_div_code = $api.domAll('.section_div_code');
+			for(var n=0;n<section_div_code.length;n++){
+				$api.remove(section_div_code[n]);
+			}
+			//删除找不到的用户
+			$api.remove($api.dom('.section_list_div_nobody'));
+			
+			//显示全部用户
+			var domAlldisplay = $api.domAll(".section_div_display");
+			for(var n=0;n<domAlldisplay.length;n++){
+				$api.css(domAlldisplay[n],"display:block");
+			}
+		});
+
+		// 监听滚动
+		window.onscroll = function (){
+			if(document.body.scrollTop>500){
+				
+				$api.css($api.dom(".backTop"),"display:block");
+			}else{
+				$api.css($api.dom(".backTop"),"display:none");
+			}
+		}
+		
+		// 监听input长度
+	    $api.byId("mobile").onkeyup=function (){
+	    	if($api.byId("mobile").value.length ==0){
+	    		$api.css($api.dom(".codeClose"),"display:none");
+	    		
+		    	//删除手机列表
+				var section_div_code = $api.domAll('.section_div_code');
+				for(var n=0;n<section_div_code.length;n++){
+					$api.remove(section_div_code[n]);
+				}
+				
+				//删除找不到的用户
+				$api.remove($api.dom('.section_list_div_nobody'));
+				
+				//显示全部用户
+				var domAlldisplay = $api.domAll(".section_div_display");
+				for(var n=0;n<domAlldisplay.length;n++){
+					$api.css(domAlldisplay[n],"display:block");
+				}
+	    	}else{
+	    		$api.css($api.dom(".codeClose"),"display:block");
+	    	}
+	    }
+
+    }
+    
+    //给少于10的月份+0
+	function zero(s){
+		if (s<10){
+			return "0"+s;
+		}else{
+			return s;
+		}
+	}
+
+
+
+
+
+

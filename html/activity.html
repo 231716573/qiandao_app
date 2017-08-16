@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+    <style type="text/css">
+	#login_core { height:52px; line-height:52px;width: 100%; background-color: #ccc;position:fixed; z-index: 10; top: 0px; margin-top: 54px; }
+	#login_core .login_core_input { margin-right: 30px; position: relative;}
+	#login_core .login_core_input input[type=number] { width: 100%; height:25px; padding: 5px 0px 5px 5px; margin-left: 10px;margin-top: 5px; }
+	#login_core .login_core_input input[type=button] { position: absolute; top:13px; right:-10px; padding: 0px 9px; height:27px; line-height: 27px; background-color: #fff; border:1px solid black; border-radius:3px;-webkit-border-radius:3px; }
+	#login_core .login_core_get { float: right; margin-top: 9px;margin-right: 10px; }
+	.go_search { position: fixed; z-index: 10; top: 10px; right: 55px; }
+	.ime-disabled{ ime-mode:disabled; background:#fff; line-height: 27px; }
+	a:link,a:hover,a:visited { color:black !important; }
+	#a_list { position: fixed; z-index: 10; right:0px; top:50%; width: 30px; font-size: 1rem; margin-top: -190px; text-align: center;}
+	#a_list a{ display: block; color: #232323;}
+	/*中间内容*/
+	#article_list { margin-top:104px; padding-bottom: 44px;}
+	.section_list { background-color: #fff; color: gray; }
+	.section_list .section_list_a { border-top:94px solid #fff; margin-top: -94px; display:block; }
+	.section_list .section_list:first-child a { margin-top: -4px; }
+	.section_list p { color: #232323; font-size: 0.85rem; text-align: center; height: 18px;line-height: 18px;background-color: #999;width: 100%; position: relative; z-index: 9;}
+	.section_list .section_list_div { position: relative;display: block; height: 61px; padding: 5px 10px; border-bottom: 1px solid #bfbfbf; color:gray;}
+	.section_list .section_list_div div { font-size: 0.85rem; line-height: 19px; }
+	.section_list .section_list_div span { display: block; position: absolute; right: 10px; top: 50%; margin-top: -7px; font-size: 0.85rem;  }
+	.section_list .section_list_div .section_list_div1 { font-size: 16px; height: 60px; line-height: 30px; color: black; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;}
+	.section_list .section_list_div .section_list_div1 i { font-size: 1rem; margin-left: 15px; }
+	.section_list .section_list_div .span_changeColor i { color: green; }
+	.section_list .section_list_div span i { color: red; }
+	.verify{position:fixed;bottom:0px;width:100%;height:44px;line-height:43px;padding-left:20px;background-color:#232323;color:#fff;font-size:1rem;z-index:10;}
+	.codeClose {position:absolute;top:9px;right:40px;width: 50px; height: 32px;text-align:center;line-height:32px;z-index: 999;}
+	#header_activity span { width:91%;display:inline-block;line-height:0px; }
+	</style>
+
+</head>
+<body>
+	<details>头部固定</details>
+	<header class="qwl_header" id="header_activity">
+		<p onclick="scanSingle()">扫</p>
+		<a class="go_first"></a>
+		<span></span>
+	</header>
+	<div id="login_core">
+		<details>签到码/扫描二维码</details>
+		<div class="login_core_input">
+			<input type="number" placeholder="请输入手机号或验证码" name="mobile" id="mobile" class="ime-disabled" pattern="[0-9]*" />
+			<input type="button" value="确定" id="inputCode" onclick="inputCode();" />
+			<p class="codeClose">x</p>
+		</div>
+	</div>
+
+	<article id="article_list">
+		<details>中间内容</details>
+		<section class="section_list">
+			<a class="section_list_a" name="A"><p style="display:none;">A</p></a>
+		</section>
+	</article>
+	<div class="backTop"></div>
+	<div class="verify">共有 <span class="verifyCount"></span> 个人报名，已签到 <span class="validateCount"></span> 个</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/loading.js"></script>
+<script type="text/javascript" src="../script/activityhistory.js"></script>
+<script type="text/javascript">
+	apiready = function(){
+		
+		loading(true);
+
+		$api.addEvt($api.dom(".go_first"), 'click',function(){
+			api.closeFrame();
+		});
+		
+		$api.addEvt($api.dom(".backTop"), 'click',function(){
+			window.scrollTo(0,0);
+		});
+		
+		var oDate = new Date();
+
+		var DateMoth = oDate.getMonth()+1;
+
+		$api.val($api.byId("mobile"), oDate.getFullYear()+zero(DateMoth));
+		
+		getActivity();
+		
+		inputLength();
+		
+	};
+	
+
+	//获取活动人员
+	function getActivity(){
+		$api.get(urlall+"validate/apply/getAppList.json?activityId="+GetString("activityId") +"&accessToken="+GetString("accessToken"),
+		function(data){
+//			alert("data:"+JSON.stringify(data))
+			
+			if(data.code == 0){
+				var validateCount = data.obj.validateCount;
+				var verifyCount   = data.obj.verifyCount;
+	
+				$api.html($api.dom(".verifyCount"), verifyCount);
+				$api.html($api.dom(".validateCount"), validateCount);
+				$api.html($api.dom("#header_activity span"), data.obj.title);
+				
+				for(var i=0;i<data.obj.applyList.length;i++){
+					var $section_list = $api.dom(".section_list");
+					
+					var childarr = [];
+					
+					var _obj = data.obj.applyList[i];
+					for(var j=0;j<_obj.peopleInfo.childInfo.length;j++){
+					
+						var __obj = _obj.peopleInfo.childInfo[j];
+						
+						var childname = __obj.realname;
+						
+						childarr.push(childname)
+
+					}	
+					
+					childarr = childarr.join('、');
+					
+					var codeStatus  = _obj.codeStatus;
+
+					if(codeStatus == "1"){
+
+						var activity = '<div class="section_div_display"><a onclick="goActivityMsg('+_obj.uid+','+_obj.applyId+')" class="section_list_div"><div class="section_list_div1">'+_obj.username+'<i>'+_obj.mobile+'</i><br />'+childarr+'</div><span><i>未签到</i> &nbsp;&nbsp;</span></a></div>';
+	
+					}else if(codeStatus == "2"){
+	
+						var activity = '<div class="section_div_display"><a onclick="goActivityMsg('+_obj.uid+','+_obj.applyId+')" class="section_list_div"><div class="section_list_div1">'+_obj.username+'<i>'+_obj.mobile+'</i><br />'+childarr+'</div><span class="span_changeColor"><i>已签到</i> &nbsp;&nbsp;</span></a></div>';
+	
+					}
+	
+					$api.append($section_list, activity);
+
+				}
+			}else if(data.code == -2){
+				alert("登录失效，请重新登录！")
+				api.closeWin();
+			}
+			
+			loading(false);
+		},'json');
+	}
+	
+
+
+	var bl = 0;
+	// 输入签到码
+	function inputCode(){
+		var strValue = $api.val($api.dom(".ime-disabled")).length;
+		
+//		$api.remove($api.dom(".section_list_div_nobody"));
+		if(strValue >= 4){
+		
+			// 签到码
+			if ($api.val($api.dom(".ime-disabled")).substr(0, 1) == '2' && strValue == 11){
+
+				api.ajax({
+			        url:urlall+"validate/apply/getApplyDetailsByCode.json?code="+$api.val($api.dom(".ime-disabled"))+"&accessToken="+GetString("accessToken"),
+			        method:'post',
+			        data: {
+				        body:{
+				        	"code":$api.val($api.dom(".ime-disabled"))
+				        }
+				    },
+				    cache: false,
+				    timeout: 20,
+				    dataType: 'json',
+				    returnAll:false
+		        },function(data,err){
+		        	if (data) {
+		        		if(data.code == -1){
+							alert("啊噢，无此用户的签到信息，是否是当前的活动用户呢？")
+						}else if(data.code == 0){
+	
+//							$api.css($api.dom(".section_div_display"),"display:none;");
+	
+							if($api.val($api.dom(".ime-disabled")) == data.obj.verifyInfo.code){
+								
+								goActivityMsg(data.obj.uid,data.obj.applyId);
+								
+							}
+						}else if(data.code == -2){
+							alert("登录失效，请重新登录！")
+							api.closeWin();
+						}
+					}
+					if (err){
+						alert("登录失效，请重新登录！")
+						api.closeWin();
+					}
+		        });
+			
+			// 手机号
+			}else if (($api.val($api.dom(".ime-disabled")).substr(0, 1) == '1' && strValue == 11) || (strValue == 4) ){
+
+				var section_div_code = $api.domAll('.section_div_code');
+				for(var n=0;n<section_div_code.length;n++){
+					$api.remove(section_div_code[n]);
+				}
+				
+				api.ajax({
+			        url:urlall+"validate/apply/getApplyListByCondition.json?activityId=" + GetString("activityId") + "&condition=" +$api.val($api.dom(".ime-disabled"))+"&accessToken="+GetString("accessToken"),
+			        method:'post',
+			        data: {
+				        body:{
+				        	"activityId":GetString("activityId"),
+				        	"condition":$api.val($api.dom(".ime-disabled"))
+				        }
+				    },
+				    cache: false,
+				    timeout: 20,
+				    dataType: 'json',
+				    returnAll:false
+		        },function(data,err){
+		        	var list_a = "";
+
+					if(data.code == -1){
+
+						list_a = '<a class="section_list_div section_list_div_nobody"><div class="section_list_div1 section_list_div2" style="line-height:60px;">'+data.msg+'</div></a>';
+
+						$api.append($api.dom(".section_list"), list_a);
+						
+						var domAlldisplay = $api.domAll(".section_div_display");
+						
+						for(var n=0;n<domAlldisplay.length;n++){
+							$api.css(domAlldisplay[n],"display:none");
+						}
+
+					}else if(data.code == 0){
+
+						var domAlldisplay = $api.domAll(".section_div_display");
+						
+						for(var n=0;n<domAlldisplay.length;n++){
+							$api.css(domAlldisplay[n],"display:none");
+						}
+
+						for(var i=0;i<data.obj.applyList.length;i++){
+							var $section_list = $api.dom(".section_list");
+					
+							var childarr = [];
+							
+							var _obj = data.obj.applyList[i];
+							
+							for(var j=0;j<_obj.peopleInfo.childInfo.length;j++){
+					
+								var __obj = _obj.peopleInfo.childInfo[j];
+								
+								var childname = __obj.realname;
+								
+								childarr.push(childname)
+		
+							}	
+							
+							childarr = childarr.join('、');
+							
+							var codeStatus  = _obj.codeStatus;
+
+							if(codeStatus == "1"){
+		
+								var activity = '<div class="section_div_display section_div_code"><a onclick="goActivityMsg('+_obj.uid+','+_obj.applyId+')" class="section_list_div"><div class="section_list_div1">'+_obj.username+'<i>'+_obj.mobile+'</i><br />'+childarr+'</div><span><i>未签到</i> &nbsp;&nbsp;</span></a></div>';
+			
+							}else if(codeStatus == "2"){
+			
+								var activity = '<div class="section_div_display section_div_code"><a onclick="goActivityMsg('+_obj.uid+','+_obj.applyId+')" class="section_list_div"><div class="section_list_div1">'+_obj.username+'<i>'+_obj.mobile+'</i><br />'+childarr+'</div><span class="span_changeColor"><i>已签到</i> &nbsp;&nbsp;</span></a></div>';
+			
+							}
+			
+							$api.append($section_list, activity);
+						}
+
+					}else if(data.code == -2){
+						alert("登录失效，请重新登录！")
+						api.closeWin();
+					}
+
+					if (err){
+						alert("登录失效，请重新登录！")
+						api.closeWin();
+					}
+		        });
+				
+			// 不是1也不是2开头的11位数字
+			}else{
+				alert('请输入正确手机号或验证码！')
+			}
+		}else{
+			alert('请输入正确手机号或验证码！！')
+		}
+
+	}
+
+	//详情页
+	function goActivityMsg(uid,applyId){
+		api.openFrame({
+	        name: "activity_msg",
+	        url: "activity_msg.html?uid=" + uid + "&applyId=" + applyId + "&activityId=" + GetString("activityId") +"&accessToken="+GetString("accessToken"),
+	        rect: {
+		        x:0,
+		        y:0,
+		        w:api.winWidth,
+		        h:api.winHeight
+	        },
+	        bounces: false,
+		    bgColor: 'rgba(0,0,0,0)',
+		    vScrollBarEnabled: false,
+		    hScrollBarEnabled: false
+	    });
+	}
+	
+	
+	
+	
+	
+	
+	
+</script>
+</html>

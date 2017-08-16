@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+    <style>
+        header{ background-color: #f2f2f2; }
+        /*中间内容*/
+       #main { position:fixed; top:30%; width:100%;}
+		#login_keydown { margin: 0px auto 0px; padding:0px 15px;}
+		#login_keydown { background-color:#232323; color: #fff; font-size:1rem; padding: 10px; line-height: 35px;  }
+		#login_keydown #userid,#login_keydown #userpassword { margin:5px 0px; background-color:#fff; line-height:21px; padding:5px 3px; border:none; border-radius: 3px;-webkit-border-radius: 3px; width: 80%;}
+		#login_keydown #rememberID { vertical-align: middle; margin-bottom: -1px; border-radius:50%; -webkit-border-radius:50%;}
+		#login_keydown .login_in { width: 100%; text-align: center; margin-top:10px; background-color: #04BE02;border-radius: 5px;-webkit-border-radius: 5px; }
+    </style>
+</head>
+<body>
+<header class="qwl_header">去玩了签到</header>
+<div id="main" class="flex-con">
+	<div id="login_keydown">
+		<details>中间内容</details>
+		<p class="login_text"><span>账号：</span><input type="text" placeholder="请输入去玩了账号" name="userid" id="userid" /></p>
+		<p class="login_password"><span>密码：</span><input type="password" placeholder="请输入密码" name="userpassword" id="userpassword" /></p>
+		<p class="login_memory"><input type="checkbox" id="rememberID" /> 记住密码</p>
+		<p class="login_in" id="login_in">登陆</p>
+	</div>
+</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/loading.js"></script>
+<script type="text/javascript">
+	var uid = 0;
+	var username = "";
+	var storage = window.localStorage;
+
+	apiready = function(){
+		$api.fixStatusBar( $api.dom('header') );
+
+        api.setStatusBarStyle({
+            style: 'light',
+            color: '#6ab494'
+        });
+        
+        $api.addEvt($api.dom(".login_in"),"click",function(){
+        	loginCheckAjax()
+        });
+        
+        checkUser();
+
+	};
+	
+	function loginCheckAjax(){
+    	var userId = $api.val($api.byId("userid"));
+    	var userPassword  = $api.val($api.byId("userpassword"));
+    	
+    	var username = "";
+    	
+    	loading(true);
+    	
+    	//记住密码
+		if(document.getElementById("rememberID").checked){
+	
+			// 保存到localStorage
+			storage["userid"] = userId;
+			storage["password"] = userPassword;
+			storage["isstorePwd"] = "yes"; 
+			
+		}else{
+			storage["userid"] = userId;
+			storage["isstorePwd"] = "no"; 
+
+		}
+		
+		// 检测账号或密码是否为空
+		if(userId == "" || userPassword == ""){
+			loading(false);
+			alert('用户名或密码不能为空！');
+
+			return false;
+		}
+		
+		api.ajax({
+	        url:urlall+"validate/ucenter/login.json",
+	        method:'post',
+	        data: {
+		        body:{
+		        	"username":$api.val($api.dom("#userid")),
+		        	"password":$api.val($api.dom("#userpassword"))
+		        }
+		    },
+		    cache: false,
+		    timeout: 30,
+		    dataType: 'json'
+        },function(ret,err){
+//			alert(JSON.stringify(ret))
+        	if(ret){
+
+        		if(ret.code == 0){
+        		
+        			uid = ret.obj.uid;
+					username = ret.obj.username;
+
+					storage["uid"] = uid;
+					storage["username"] = username;
+
+					api.openWin({
+	                    name: 'contain',
+	                    url: "contain.html"+ "?uid=" + uid +"&accessToken=" + ret.obj.accessToken
+                    });
+
+					loading(false);
+					
+				}else if(ret.code == -1){
+					alert(ret.msg)
+					loading(false);
+				}
+
+        	}
+        	if(err){
+        		alert('登陆失败，请重试-'+ JSON.stringify(err))
+        		loading(false);
+        	}
+        });
+    }
+    
+    //检测账号
+    function checkUser(){
+
+	    var getname = storage["userid"];  
+	    var getPwd = storage["password"];  
+	    var getisstroepwd = storage["isstorePwd"];  
+	    var getisautologin = storage["isautologin"];  
+	
+	    if("yes" == getisstroepwd){  
+
+            if((("" != getname)||(null != getname)) && (("" != getPwd)||(null != getPwd))){  
+                //lacoste  已经保存 登陆信息 直接登陆  
+                $api.val($api.dom("#userid"),getname);
+                $api.val($api.dom("#userpassword"),getPwd);
+                $api.attr($api.dom("#rememberID"),'checked',true);
+                document.getElementById("login_in").click();
+//	            console.log(document.getElementById("login_in").click())
+            }
+        }else {     
+            $api.val($api.dom("#userid"),getname);
+            $api.val($api.dom("#userpassword"),getPwd);
+            $api.attr($api.dom("#rememberID"),'checked',false);
+            document.getElementById("login_in").click();
+//	        console.log(document.getElementById("login_in").click())
+        }
+
+
+    }
+    
+    
+    
+    
+    
+    
+    
+</script>
+</html>

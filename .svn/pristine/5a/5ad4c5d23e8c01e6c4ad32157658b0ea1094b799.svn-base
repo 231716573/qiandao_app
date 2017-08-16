@@ -1,0 +1,46 @@
+/*reset*/
+body,div,ol,ul,h1,h2,h3,h4,h5,h6,p,th,td,dl,dd,form,iframe,input,textarea,select,label,article,aside,footer,header,menu,nav,section,time,audio,video {
+  margin:0;
+  padding:0;
+}
+article,aside,footer,header,hgroup,nav,section,audio,canvas,video,img {
+    display: block;
+}
+body {
+    font-size: 100%; 
+    font-family:Helvetica,STHeiti,Droid Sans Fallback;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+    width: 100%; 
+    word-break:break-all;
+}
+textarea {
+    resize: none;
+}
+iframe,img {
+    border:0;
+}
+ul,ol {
+    list-style:none;
+}
+input,select,textarea {
+    outline: 0;
+    -webkit-user-modify: read-write-plaintext-only;
+}
+input[type="button"], input[type="submit"], input[type="reset"] {
+-webkit-appearance: none;
+}
+a{
+    text-decoration: none;
+}
+body,.global{
+    background: #fafafa
+}
+.global{
+    width: 100%; overflow: hidden;
+}
+details { 
+    display: none;
+}
+i,em { font-style: normal; }

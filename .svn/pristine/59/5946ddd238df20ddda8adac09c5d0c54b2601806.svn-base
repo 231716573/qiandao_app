@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+    <style type="text/css">
+	/*中间内容*/
+	a:link,a:hover,a:visited { color:black !important; }
+	.section_list { margin-top: 64px; }
+	.section_list dl { clear: both; overflow: hidden; padding:10px 20px; border-bottom: 1px solid #bfbfbf; font-size: 1rem; }
+	.section_list dl dt { float: left; width: 90px; color: #666; line-height: 25px;overflow: hidden;}
+	.section_list dl dd { line-height: 25px; }
+	.section_list .beizhu span { float: left; }
+	.section_list .beizhu textarea { width:100%; margin-top: 5px;}
+	.section_list .beizhu .beizhu_button { float: right; }
+	#tel_a { color: blue; }
+	.phone { background: url(../image/phone.png) center right no-repeat;width:150px; }
+	#qd { padding:3px 20px;margin-left:40px;background-color: #fff; border:1px solid gray; border-radius:3px;-webkit-border-radius:3px; 
+		  background: -moz-linear-gradient(top, #fff 0%, gray 150%);
+	      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff), color-stop(150%,gray));
+	      background: -webkit-linear-gradient(top, #fff 0%,gray 150%);
+	      background: -o-linear-gradient(top, #fff 0%,gray 150%);
+	      background: -ms-linear-gradient(top, #fff 0%,gray 150%);
+	      background: linear-gradient(top bottom, #fff 0%,gray 150%);}
+	</style>
+
+</head>
+<body>
+<header class="qwl_header"><a class="back_activity"></a><span style="width:91%;display:inline-block;"></span></header>
+<section class="section_list">
+	<div>
+		<dl>
+			<dt>用户名：</dt>
+			<dd class="fatherName"></dd>
+		</dl>
+		<dl>
+			<dt>孩子姓名：</dt>
+			<dd class="babyName"></dd>
+		</dl>
+		<dl>
+			<dt>电话：</dt>
+			<a id="tel_a"><dd class="phone"></dd></a>
+		</dl>
+		<dl>
+			<dt>人数：</dt>
+			<dd class="number"></dd>
+		</dl>
+		<dl>
+			<dt>金额：</dt>
+			<dd class="momery"></dd>
+		</dl>
+		<dl>
+			<dt>支付方式：</dt>
+			<dd class="payAddress"></dd>
+		</dl>
+		<dl class="qd">
+			<dt>签到状态：</dt>
+		</dl>
+		<dl>
+			<dt>签到码：</dt>
+			<dd class="core"></dd>
+		</dl>
+		<dl class="beizhu" style="display:none;">
+			<dd><span>备注：</span><input type="button" value="保存" class="beizhu_button" onclick="senduser();" style="padding:3px 5px;" /><textarea name="" id="" rows="3"></textarea></dd>
+		</dl>
+	</div>
+</section>
+
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/loading.js"></script>
+<script type="text/javascript" src="../script/md5.js"></script>
+<script type="text/javascript" src="../script/activityhistory.js"></script>
+<script type="text/javascript">
+	var apply_Id,ui_d,user_name,activity_Id,_code,shop_Id,code_Id,admin_Name,_ip,obj_mobile;
+
+	var admin_Id = 1;
+
+	apiready = function(){
+	
+		loading(true);
+		
+		var qdYesNo = "";
+		
+		$api.addEvt($api.dom(".back_activity"),"click", function(){
+			api.closeFrame();
+		});
+	
+		getPersenMsg();
+		
+	};
+	
+	
+	//获取人员详细信息
+	function getPersenMsg(){
+		$api.get(urlall+"validate/apply/getApplyDetails.json?applyId="+GetString("applyId")+"&uid="+GetString("uid")+"&accessToken="+GetString("accessToken"),
+		function(data){
+		
+			apply_Id = data.obj.applyId;
+			ui_d = data.obj.uid;
+			user_name =  data.obj.username;
+			activity_Id = data.obj.activityId;
+			_code = data.obj.verifyInfo.code;
+			shop_Id = data.obj.shopId;
+			code_Id = data.obj.verifyInfo.codeId;
+			admin_Id = window.localStorage["uid"];
+			admin_Name = window.localStorage["username"];
+			_ip = '192.169.19.249';
+			
+			$api.html($api.dom(".qwl_header span"), data.obj.title);
+			$api.html($api.dom(".fatherName"), data.obj.username);
+			$api.html($api.dom(".phone"), data.obj.mobile);
+			$api.html($api.dom(".number"), data.obj.applyNum);
+			$api.html($api.dom(".payAddress"), data.obj.orderInfo.payType);
+			$api.html($api.dom(".momery"), data.obj.orderInfo.priceTotal);
+			obj_mobile = data.obj.mobile;
+			
+			$api.addEvt($api.dom("#tel_a"), "click",function (){
+				api.call({
+				    type: 'tel',
+				    number: data.obj.mobile
+				});
+			});
+
+			if(data.obj.verifyInfo.statusName =="已验证"){
+
+				qdYesNo = '<dd class="qd_yes qd_delete" style="color:green;">已签到</dd>';
+				
+			}else{
+	
+				qdYesNo = '<dd class="qd_no qd_delete" style="color:red;">未签到 <input type="button" value="签到" id="qd" onclick="senduser(\'history\');" /></dd>';
+			
+			}
+			
+			$api.append($api.dom(".qd"), qdYesNo);
+			$api.html($api.dom(".core"), data.obj.verifyInfo.code);
+			
+			for(var i=0;i<data.obj.peopleInfo.childInfo.length;i++){
+			
+				var _obj = data.obj.peopleInfo.childInfo[i];
+				
+				if(i == data.obj.peopleInfo.childInfo.length-1){
+					var childname = '<span>'+_obj.realname+'</span>';
+				}else{
+					var childname = '<span>'+_obj.realname+'、</span>';
+				}
+				
+				$api.append($api.dom(".babyName"), childname);
+			}
+	
+			loading(false);
+
+		},'json');
+	}
+
+</script>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>活动列表</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+    <style type="text/css">
+	/*中间内容*/
+	#article_list { margin-top:75px; margin-bottom: 44px;}
+	.section_list { background-color: #fff; margin-bottom: 0.2rem; color: gray; }
+	.section_list p { background-color: #bfbfbf; color: #fff; font-size: 0.85rem; text-align: center; width: 100%; padding: 0.1rem 0; }
+	.section_list .section_list_div { position: relative;display: block; padding: 5px 10px; border-bottom: 1px solid #bfbfbf; color: gray;}
+	.section_list .section_list_div div { font-size: 0.85rem; line-height: 19px; }
+	.section_list .section_list_div span { display: block; position: absolute; right: 10px; top: 50%; margin-top: -7px; font-size: 0.85rem;  }
+	.section_list .section_list_div .section_list_div1 { font-size: 1.1rem; color: black; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;}
+	.section_list .section_list_div .span_changeColor i { color: green;  }
+	.section_list .section_list_div span i { color: red; }
+	</style>
+
+</head>
+<body>
+    <details>头部固定</details>
+	<header class="qwl_header">去玩了签到</header>
+	<div id="login_msg"><span>本周活动签到</span><i id="login_msg_i"></i>&nbsp; <a class="exit">退出</a></div>
+
+	<article id="article_list">
+		<details>中间内容</details>
+		<section class="section_list">
+<!--			<a class='section_list_div'>
+				<div class='section_list_div1'>新建免费活动</div>
+				<div>报名：1111人</div>
+				<div class='span_changeColor'>
+					<i>签到：2222人</i>
+				</div>
+				<div>活动时间：2017-06-30 08:40—08:40</div>
+				<span class='span_changeColor'>
+					<i>签到</i> &nbsp;>
+				</span>
+			</a>
+			
+			<a class="section_list_div">
+				<div class="section_list_div1">新建免费活动2</div>
+				<div>报名：6人</div>
+				<div><i>签到：8人</i></div>
+				<div>活动时间：2017-06-30 08:40—08:40</div>
+				<span><i>签到</i> &nbsp;&gt;</span>
+			</a>-->
+
+			<div class="clearboth"></div>
+		</section>
+	</article>
+	<div style="width:100%;position:fixed;top:200px;text-align:center; display:none;" class="this_no">啊噢，此小丸子本周不需要带队...</div>
+
+</body>
+</html>
+
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/loading.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+    	loading(true);
+		
+        //下拉刷新
+		api.setRefreshHeaderInfo({
+		    visible: true,
+		    loadingImg: '../image/refreshing_image_01.png',
+		    bgColor: '#ccc',
+		    textColor: '#fff',
+		    textDown: '下拉刷新...',
+		    textLoadin:'加载中...',
+		    textUp: '松手刷新...',
+		    showTime: true
+		}, function (ret, err) {
+			
+		    api.refreshHeaderLoadDone();
+		});
+		
+		$api.html($api.dom("#login_msg_i"), window.localStorage["username"]);
+		
+		//退出
+		$api.addEvt($api.dom(".exit"), "click",function(){
+	    	api.closeWin();
+	    	localStorage.clear();
+		});
+		
+		getActivity();
+		
+		
+    }
+    
+    // 获取活动列表
+    function getActivity(){
+    	var url = urlall+"validate/activity/getThisWeekActivityList.json?uid="+window.localStorage["uid"]+"&accessToken="+GetString("accessToken");
+    	
+    	$api.get(url,
+    	function (data){
+//			alert(JSON.stringify(data))
+    		if(data.code == -1){
+
+				$api.css($api.dom(".this_no"),"display:block");
+
+			}else if(data.code == 0){
+	
+				var $listmore = $api.dom(".section_list");
+
+				for(var i=0;i<data.obj.length;i++){
+					var _obj = data.obj[i];
+					
+					if(_obj.validateCount == _obj.verifyCount){
+						var activity = '<a class="section_list_div" onclick="goActivityMsg('+_obj.activityId+')"><div class="section_list_div1">'+_obj.title+'</div><div>报名：'+_obj.verifyCount+'人</div><div class="span_changeColor"><i>签到：'+_obj.validateCount+'人</i></div><div>活动时间：'+_obj.startTime+'</div><span class="span_changeColor"><i>签到</i> &nbsp;></span></a>';
+					}else{
+						var activity = '<a class="section_list_div" onclick="goActivityMsg('+_obj.activityId+')"><div class="section_list_div1">'+_obj.title+'</div><div>报名：'+_obj.verifyCount+'人</div><div><i>签到：'+_obj.validateCount+'人</i></div><div>活动时间：'+_obj.startTime+'</div><span><i>签到</i> &nbsp;&gt;</span></a>';
+					}
+					
+					$api.append($listmore, activity);
+				}
+
+			}else if(data.code == -2){
+	
+				alert("登录失效，请重新登录！")
+				api.closeWin();
+			}
+	
+			loading(false);
+
+    	},'json');
+    }
+    
+	// 跳到活动人员页面
+    function goActivityMsg(activityId){
+        api.openFrame({
+	        name: 'activity',
+	        url: "activity.html?uid="+window.localStorage['uid']+"&activityId="+activityId+"&accessToken="+ GetString('accessToken'),
+	        rect: {
+		        x:0,
+		        y:0,
+		        w:api.winWidth,
+		        h:'auto'
+	        },
+	        bounces: false,
+		    bgColor: 'rgba(0,0,0,0)',
+		    vScrollBarEnabled: false,
+		    hScrollBarEnabled: false
+        });
+    }
+    
+
+
+</script>

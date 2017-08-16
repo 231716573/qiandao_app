@@ -1,0 +1,19 @@
+/*澶撮儴*/
+.qwl_header { height:60px; line-height: 64px; width: 100%; position: fixed; top: 0px; z-index: 10; overflow: hidden; background-color: #323232; color:#fff; text-align: center; }
+.qwl_header a { display: inline-block; position: fixed;left: 10px; top: 23px; width: 20px; height: 20px; background:url(../image/l.png) no-repeat; background-size:10px 17px;}
+.qwl_header p { position:fixed;width:30px;height:30px;line-height:30px;right:6px;top:18px;color:black;background-color:#fff;border:1px solid black;border-radius: 4px; }
+
+/*XX灏忎父瀛�*/
+#login_msg { position:fixed; z-index: 10; top: 10px; margin-top: 44px; height: 22px;line-height: 22px; text-align: right; width: 100%; font-size: 1rem; border-bottom: 1px solid #323232; background-color: #fff; }
+#login_msg a { margin-right: 10px; }
+#login_msg span { float: left; margin-left: 10px; }
+
+/*搴曢儴nav*/
+.nav_three { display: -webkit-box; display: box;position: fixed; width: 100%; bottom: 0px; height:44px; line-height: 44px; background-color: #bfbfbf; }
+.nav_three a { display: block; -moz-box-flex: 1; -webkit-box-flex: 1;  box-flex: 1; text-align: center; border-right: 2px solid #fff; color: #fff;}
+.nav_three a:last-child { border: none; }
+.nav_three_color { background-color: #323232; }
+
+/*鍥炲埌澶撮儴*/
+.backTop { position:fixed;bottom:50px;right:20px;width: 29px;height: 29px;background-color: gray;border-radius:50%;-webkit-border-radius:50%; display: none;}
+.backTop:after { content: " ";display: inline-block; position: fixed; width: 9px; height: 9px; border-top:1px solid #fff; border-right:1px solid #fff; right: 29px; bottom:57px; transform:rotate(-45deg); -webkit-transform:rotate(-45deg);-ms-transform:rotate(-45deg);-o-transform:rotate(-45deg);}
